@@ -3,6 +3,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
 using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Configuration;
 using Microsoft.IdentityModel.Tokens;
@@ -18,8 +19,10 @@ namespace PortalRandkowy.API.Controllers
     {
         private readonly IAuthRepository _repository;
         private readonly IConfiguration _config;
-        public AuthController(IAuthRepository repository, IConfiguration config)
+        private readonly IMapper _mapper;
+        public AuthController(IAuthRepository repository, IConfiguration config, IMapper mapper)
         {
+            _mapper = mapper;
             _config = config;
             _repository = repository;
         }
@@ -68,7 +71,11 @@ namespace PortalRandkowy.API.Controllers
             var tokenHandler = new JwtSecurityTokenHandler();
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
-            return Ok(new { token = tokenHandler.WriteToken(token)});
+            var user = _mapper.Map<UserForListDto>(userFromRepo);
+
+            return Ok(new { token = tokenHandler.WriteToken(token),
+            user
+            });
         }
     }
 }
